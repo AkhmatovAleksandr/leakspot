@@ -3,8 +3,8 @@
 **Zero-overhead process memory & resource leak watcher for Linux systems.**
 
 [![Language](https://img.shields.io/badge/language-C%2B%2B23-blue.svg)](https://en.cppreference.com/w/cpp/23)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-112%20passing-brightgreen.svg)]()
+[![License](https://img.shields.io/badge/license-GPL--3.0-green.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-125%20passing-brightgreen.svg)]()
 [![Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen.svg)]()
 
 `leakspot` is a standalone, high-performance systems tool designed to answer one critical question for any running service, binary, or test suite:
@@ -179,4 +179,4 @@ flowchart TD
 
 ## License
 
-MIT License. Copyright (c) 2026 Akhmatov Aleksandr Tarasovich. Crafted with precision for high-performance systems observability.
+GNU General Public License v3.0 (GPL-3.0). Copyright (c) 2026 Akhmatov Aleksandr Tarasovich. Crafted with precision for high-performance systems observability.
