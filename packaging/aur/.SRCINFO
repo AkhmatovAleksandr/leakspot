@@ -2,7 +2,7 @@ pkgbase = leakspot
 	pkgdesc = Zero-overhead process memory and resource leak watcher for Linux systems
 	pkgver = 1.0.0
 	pkgrel = 1
-	url = https://github.com/runvoid/leakspot
+	url = https://github.com/AkhmatovAleksandr/leakspot
 	arch = x86_64
 	license = MIT
 	makedepends = cmake
@@ -10,7 +10,7 @@ pkgbase = leakspot
 	makedepends = clang
 	makedepends = mold
 	depends = glibc
-	source = leakspot-1.0.0.tar.gz::https://github.com/runvoid/leakspot/archive/refs/tags/v1.0.0.tar.gz
+	source = leakspot-1.0.0.tar.gz::https://github.com/AkhmatovAleksandr/leakspot/archive/refs/tags/v1.0.0.tar.gz
 	sha256sums = SKIP
 
 pkgname = leakspot

@@ -42,20 +42,20 @@ Unlike Valgrind or AddressSanitizer, `leakspot` requires **zero recompilation, n
   * Ceilings: `--max-rss <MB>`, `--max-anon <MB>`, `--max-fds <N>`, `--max-threads <N>`, `--timeout <sec>`.
   * Return code `1` on leak: `--fail-on-leak`.
 * **Automated Ninja Test Suite**:
-  * **112 Unit Tests** executing automatically on every `ninja` build.
+  * **125 Unit Tests** executing automatically on every `ninja` build.
 
 ---
 
 ## Building & Automatic Testing
 
 ```bash
-git clone https://github.com/runvoid/leakspot.git
+git clone https://github.com/AkhmatovAleksandr/leakspot.git
 cd leakspot
 cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++
 ninja -C build
 ```
 
-> **Note:** Ninja automatically compiles and executes the entire 112-test suite (`run_all_tests`) at the end of every build!
+> **Note:** Ninja automatically compiles and executes the entire 125-test suite (`run_all_tests`) at the end of every build!
 
 ---
 
@@ -172,7 +172,7 @@ flowchart TD
 
 ## Authors & Acknowledgments
 
-* **Akhmatov Aleksandr Tarasovich ([@runvoid](https://github.com/runvoid))** — Creator and maintainer.
+* **Akhmatov Aleksandr Tarasovich ([@AkhmatovAleksandr](https://github.com/AkhmatovAleksandr))** — Creator and maintainer.
 * **Antigravity** — AI coding assistant by Google DeepMind (Advanced Agentic Coding), pair programming partner and co-architect for the C++23 systems telemetry engine, statistical regression algorithms, and automated test suite.
 
 ---

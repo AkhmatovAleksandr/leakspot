@@ -1,16 +1,16 @@
-# Maintainer: Akhmatov Aleksandr Tarasovich (runvoid) <runvoid@users.noreply.github.com>
+# Maintainer: Akhmatov Aleksandr Tarasovich <mironovaleks620@gmail.com>
 pkgname=leakspot-git
 pkgver=1.0.0.r0.g0000000
 pkgrel=1
 pkgdesc="Zero-overhead process memory and resource leak watcher for Linux systems (VCS git version)"
 arch=('x86_64')
-url="https://github.com/runvoid/leakspot"
+url="https://github.com/AkhmatovAleksandr/leakspot"
 license=('MIT')
 depends=('glibc')
 makedepends=('git' 'cmake' 'ninja' 'clang' 'mold')
 provides=('leakspot')
 conflicts=('leakspot')
-source=("git+https://github.com/runvoid/leakspot.git")
+source=("git+https://github.com/AkhmatovAleksandr/leakspot.git")
 sha256sums=('SKIP')
 
 pkgver() {
