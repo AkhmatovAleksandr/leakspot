@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Akhmatov Aleksandr Tarasovich
+
 #include "detector.hpp"
 
 namespace leakspot {
