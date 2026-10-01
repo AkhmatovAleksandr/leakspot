@@ -117,10 +117,10 @@ std::vector<std::string> Sparkline::render_chart(
         row_str.reserve(width);
 
         for (size_t c = 0; c < width; ++c) {
-            double val = sample_pts[c];
             if (range <= 1e-9) {
                 row_str += (r == height - 1) ? "-" : " ";
             } else {
+                double val = sample_pts[c];
                 double normalized_y = (val - min_v) / range; // 0 to 1
                 double cell_y = static_cast<double>(height - 1 - r) / static_cast<double>(height - 1);
                 if (std::abs(normalized_y - cell_y) < (0.5 / static_cast<double>(height))) {

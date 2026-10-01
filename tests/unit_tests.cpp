@@ -431,7 +431,7 @@ int main() {
     TEST_ASSERT("Smaps parser: map 2 is anonymous", parsed_maps[2].pathname == "[anon]");
 
     // Diffing tests
-    auto baseline_maps = parsed_maps;
+    const auto& baseline_maps = parsed_maps;
     auto expanded_maps = parsed_maps;
     // Simulate heap growing by 5 MB
     expanded_maps[1].anon_bytes += 5 * 1024 * 1024;

@@ -1,0 +1,14 @@
+---
+Checks: >
+  -*,
+  bugprone-*,
+  clang-analyzer-*,
+  performance-*,
+  readability-*,
+  -readability-magic-numbers,
+  -readability-else-after-return,
+  -readability-function-cognitive-complexity,
+  -readability-identifier-length
+
+HeaderFilterRegex: 'include/.*'
+FormatStyle: none

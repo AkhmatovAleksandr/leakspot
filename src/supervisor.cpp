@@ -15,7 +15,8 @@
 
 namespace leakspot {
 
-void Supervisor::signal_handler(int) {
+void Supervisor::signal_handler(int signum) {
+    (void)signum;
     stop_requested_.store(true);
 }
 

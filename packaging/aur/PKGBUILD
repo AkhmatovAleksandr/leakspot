@@ -6,13 +6,13 @@ pkgdesc="Zero-overhead process memory and resource leak watcher for Linux system
 arch=('x86_64')
 url="https://github.com/AkhmatovAleksandr/leakspot"
 license=('GPL-3.0-or-later')
-depends=('glibc')
+depends=('glibc' 'gcc-libs')
 optdepends=(
     'bash-completion: for tab-completion in bash'
 )
 makedepends=('cmake' 'ninja' 'clang' 'mold')
 source=("${pkgname}-${pkgver}.tar.gz::https://github.com/AkhmatovAleksandr/${pkgname}/archive/refs/tags/v${pkgver}.tar.gz")
-sha256sums=('SKIP')
+sha256sums=('a6796da19c1478611519d08b92e61c8ac371848ba3c103ec8c795814ea22c9e2')
 
 build() {
     cmake -B build -S "${pkgname}-${pkgver}" \

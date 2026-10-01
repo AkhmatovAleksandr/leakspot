@@ -26,6 +26,8 @@ int main() {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
+    volatile char val = cache[0];
+    (void)val;
     std::cout << "[stable_workload] Steady-state complete without leaks. Exiting.\n";
     return 0;
 }

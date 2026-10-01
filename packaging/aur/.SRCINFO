@@ -10,8 +10,9 @@ pkgbase = leakspot
 	makedepends = clang
 	makedepends = mold
 	depends = glibc
+	depends = gcc-libs
 	optdepends = bash-completion: for tab-completion in bash
 	source = leakspot-1.0.0.tar.gz::https://github.com/AkhmatovAleksandr/leakspot/archive/refs/tags/v1.0.0.tar.gz
-	sha256sums = SKIP
+	sha256sums = a6796da19c1478611519d08b92e61c8ac371848ba3c103ec8c795814ea22c9e2
 
 pkgname = leakspot

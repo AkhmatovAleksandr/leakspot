@@ -124,7 +124,7 @@ void parse_proc_net_file(const std::string& path, const std::string& proto, std:
 
     while (std::getline(file, line)) {
         char local_hex[64], rem_hex[64];
-        int local_port = 0, rem_port = 0, state_code = 0;
+        unsigned int local_port = 0, rem_port = 0, state_code = 0;
         unsigned long inode = 0;
 
         // Format: sl: local_addr:port rem_addr:port st ... inode
@@ -132,11 +132,11 @@ void parse_proc_net_file(const std::string& path, const std::string& proto, std:
                    local_hex, &local_port, rem_hex, &rem_port, &state_code, &inode) >= 6) {
             SocketDetails sd;
             sd.proto = proto;
-            sd.local_addr = ProcFs::format_ip_port(local_hex, local_port);
-            sd.local_port = local_port;
-            sd.remote_addr = ProcFs::format_ip_port(rem_hex, rem_port);
-            sd.remote_port = rem_port;
-            sd.state = ProcFs::parse_tcp_state(state_code);
+            sd.local_addr = ProcFs::format_ip_port(local_hex, static_cast<int>(local_port));
+            sd.local_port = static_cast<int>(local_port);
+            sd.remote_addr = ProcFs::format_ip_port(rem_hex, static_cast<int>(rem_port));
+            sd.remote_port = static_cast<int>(rem_port);
+            sd.state = ProcFs::parse_tcp_state(static_cast<int>(state_code));
             sd.inode = static_cast<ino_t>(inode);
             sockets[sd.inode] = sd;
         }
