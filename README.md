@@ -5,6 +5,8 @@
 [![Language](https://img.shields.io/badge/language-C%2B%2B23-blue.svg)](https://en.cppreference.com/w/cpp/23)
 [![License](https://img.shields.io/badge/license-GPL--3.0-green.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-125%20passing-brightgreen.svg)]()
+[![AUR package](https://img.shields.io/badge/aur-leakspot-blue.svg)](https://aur.archlinux.org/packages/leakspot)
+[![AUR git](https://img.shields.io/badge/aur-leakspot--git-blue.svg)](https://aur.archlinux.org/packages/leakspot-git)
 [![Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen.svg)]()
 
 `leakspot` is a standalone, high-performance systems tool designed to answer one critical question for any running service, binary, or test suite:
@@ -41,12 +43,35 @@ Unlike Valgrind or AddressSanitizer, `leakspot` requires **zero recompilation, n
 * **CI/CD Assertions**:
   * Ceilings: `--max-rss <MB>`, `--max-anon <MB>`, `--max-fds <N>`, `--max-threads <N>`, `--timeout <sec>`.
   * Return code `1` on leak: `--fail-on-leak`.
+* **Arch Linux & Shell Integration**:
+  * Built-in UNIX manual page: `man leakspot`
+  * Full tab completion for **Bash**, **Zsh**, and **Fish**.
 * **Automated Ninja Test Suite**:
   * **125 Unit Tests** executing automatically on every `ninja` build.
 
 ---
 
-## Building & Automatic Testing
+## Installation
+
+### Arch Linux (AUR)
+
+Install the stable release:
+```bash
+yay -S leakspot
+# or
+paru -S leakspot
+```
+
+Install bleeding-edge from master:
+```bash
+yay -S leakspot-git
+# or
+paru -S leakspot-git
+```
+
+> **Tip:** The package automatically installs manual pages (`man leakspot`) and shell autocompletions for **Bash**, **Zsh**, and **Fish**.
+
+### Building from Source & Automatic Testing
 
 ```bash
 git clone https://github.com/AkhmatovAleksandr/leakspot.git
@@ -56,6 +81,11 @@ ninja -C build
 ```
 
 > **Note:** Ninja automatically compiles and executes the entire 125-test suite (`run_all_tests`) at the end of every build!
+
+To install system-wide from source:
+```bash
+sudo ninja -C build install
+```
 
 ---
 

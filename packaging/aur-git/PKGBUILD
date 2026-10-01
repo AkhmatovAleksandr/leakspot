@@ -7,6 +7,9 @@ arch=('x86_64')
 url="https://github.com/AkhmatovAleksandr/leakspot"
 license=('GPL-3.0-or-later')
 depends=('glibc')
+optdepends=(
+    'bash-completion: for tab-completion in bash'
+)
 makedepends=('git' 'cmake' 'ninja' 'clang' 'mold')
 provides=('leakspot')
 conflicts=('leakspot')

@@ -1,0 +1,193 @@
+.\" SPDX-License-Identifier: GPL-3.0-or-later
+.\" Copyright (c) 2026 Akhmatov Aleksandr Tarasovich <mironovaleks620@gmail.com>
+.TH LEAKSPOT 1 "October 2026" "leakspot 1.0.0" "User Commands"
+.SH NAME
+leakspot \- zero-overhead process memory, socket, and resource leak watcher for Linux
+.SH SYNOPSIS
+.B leakspot
+[\fB\-p\fR \fIPID\fR]
+[\fB\-i\fR \fISECONDS\fR]
+[\fB\-w\fR \fISECONDS\fR]
+[\fB\-t\fR \fISECONDS\fR]
+[\fB\-m\fR \fIBYTES/SEC\fR]
+[\fB\-d\fR \fIFDS/MIN\fR]
+[\fB\-r\fR \fIR_SQUARED\fR]
+[\fB\-f\fR]
+[\fB\-\-fail\-on\-leak\fR]
+[\fB\-\-max\-rss\fR \fIMB\fR]
+[\fB\-\-max\-anon\fR \fIMB\fR]
+[\fB\-\-max\-fds\fR \fICOUNT\fR]
+[\fB\-\-max\-threads\fR \fICOUNT\fR]
+[\fB\-\-no\-exp\fR]
+[\fB\-\-no\-sockets\fR]
+[\fB\-\-inspect\-maps\fR]
+[\fB\-\-html\fR \fIFILE\fR]
+[\fB\-\-json\fR]
+[\fB\-\-csv\fR]
+[\fB\-q\fR | \fB\-\-quiet\fR]
+[\fB\-\-cwd\fR \fIPATH\fR]
+[\fB\-\-env\fR \fIKEY=VAL\fR]
+[\fB\-\-\fR \fICOMMAND\fR [\fIARGS...\fR]]
+.SH DESCRIPTION
+.B leakspot
+is a standalone systems observability tool designed to detect memory leaks, file descriptor exhaustion, socket buildup, and thread abandonment in Linux processes without requiring recompilation, debug symbols, or runtime interception (such as LD_PRELOAD or ptrace).
+.PP
+By periodically inspecting Linux kernel telemetry through
+.BR /proc/ [ \fIpid\fR ]/smaps_rollup ,
+.BR /proc/ [ \fIpid\fR ]/status ,
+.BR /proc/ [ \fIpid\fR ]/fd ,
+and
+.BR /proc/net/tcp ,
+.B leakspot
+evaluates resource growth trends using real-time least-squares linear regression, exponential rate acceleration analysis, and Theil-Sen robust slope estimators.
+.SH OPTIONS
+.SS Target Selection
+.TP
+.BI \-p\  PID ,\ \-\-pid\  PID
+Attach to an already running process with the specified process ID.
+.TP
+.BI \-\-\  COMMAND \ [ ARGS... ]
+Spawn and supervise a new child process directly. All arguments following the double-dash are passed directly to the child binary.
+.SS Sampling & Warmup
+.TP
+.BI \-i\  SEC ,\ \-\-interval\  SEC
+Sampling interval in seconds. Supports floating point precision (default: \fB1.0\fR).
+.TP
+.BI \-w\  SEC ,\ \-\-warmup\  SEC
+Grace period duration in seconds. During warmup, statistical samples are gathered into the baseline regression models, but no leak verdicts are emitted (default: \fB10.0\fR).
+.TP
+.BI \-t\  SEC ,\ \-\-timeout\  SEC
+Maximum supervision time in seconds before terminating the supervised process (default: \fB0\fR, unlimited).
+.SS Detection Thresholds
+.TP
+.BI \-m\  RATE ,\ \-\-mem\-threshold\  RATE
+Minimum anonymous memory growth rate threshold (in bytes per second) required to classify a growth trend as a leak (default: \fB10240\fR, i.e., 10 KB/s).
+.TP
+.BI \-d\  RATE ,\ \-\-fd\-threshold\  RATE
+Minimum file descriptor growth rate threshold (in file descriptors per minute) required to flag a leak (default: \fB2.0\fR FDs/min).
+.TP
+.BI \-r\  R2 ,\ \-\-min\-r2\  R2
+Minimum coefficient of determination (R\(S2) required to confirm statistical linearity and declare a high-confidence leak (default: \fB0.85\fR).
+.SS Process Tree & Analysis
+.TP
+.BR \-f , \ \-\-follow\-children
+Recursively monitor all child processes spawned by the target process, aggregating memory, file descriptors, and thread statistics across the entire process tree.
+.TP
+.B \-\-inspect\-maps
+Perform detailed virtual address mapping diffing via \fB/proc/[pid]/smaps\fR, pinpointing growing heap segments, anonymous mmap allocations, and specific shared libraries.
+.TP
+.B \-\-no\-exp
+Disable exponential acceleration detection (evaluates linear regression only).
+.TP
+.B \-\-no\-sockets
+Skip resolving open socket file descriptors against \fB/proc/net/tcp\fR and \fB/proc/net/udp\fR.
+.SS Hard Limits & CI/CD Assertions
+.TP
+.BI \-\-max\-rss\  MB
+Fail supervision if Resident Set Size (RSS) exceeds the specified threshold in megabytes.
+.TP
+.BI \-\-max\-anon\  MB
+Fail supervision if Anonymous memory exceeds the specified threshold in megabytes.
+.TP
+.BI \-\-max\-fds\  COUNT
+Fail supervision if open file descriptors exceed the specified limit.
+.TP
+.BI \-\-max\-threads\  COUNT
+Fail supervision if active thread count exceeds the specified limit.
+.TP
+.B \-\-fail\-on\-leak
+Exit with code \fB1\fR if any memory leak, descriptor leak, or hard ceiling violation is detected upon termination.
+.SS Output & Reporting
+.TP
+.B \-q , \ \-\-quiet
+Suppress real-time ANSI terminal tickers; only print the post-mortem summary upon process exit.
+.TP
+.BI \-\-html\  FILE
+Generate a comprehensive, self-contained, offline interactive HTML report dashboard upon completion.
+.TP
+.B \-\-json
+Stream real-time telemetry and verdicts as newline-delimited JSON (NDJSON) to standard output.
+.TP
+.B \-\-csv
+Stream real-time telemetry samples formatted as CSV to standard output.
+.SS Environment & Execution
+.TP
+.BI \-\-cwd\  PATH
+Set the working directory for the spawned child process.
+.TP
+.BI \-\-env\  KEY=VALUE
+Inject or override an environment variable in the spawned child process (can be specified multiple times).
+.TP
+.BR \-h , \ \-\-help
+Display command-line help and exit.
+.TP
+.BR \-v , \ \-\-version
+Display version and copyright information.
+.SH DETECTION METHODOLOGY
+.B leakspot
+utilizes multi-stage statistical heuristics:
+.IP 1. 4
+\fBLeast-Squares Linear Regression:\fR
+Calculates slope \fIm\fR, y-intercept \fIb\fR, Pearson correlation coefficient \fIr\fR, and coefficient of determination \fIR^2\fR on anonymous memory and file descriptor counts over time.
+.IP 2. 4
+\fBExponential Rate Acceleration:\fR
+Fits an exponential model \fIy = a * e^(bx)\fR to detect runaway allocation spirals where growth velocity increases over time (d^2y/dx^2 > 0).
+.IP 3. 4
+\fBRobust Estimators:\fR
+Applies Median Absolute Deviation (MAD) outlier filtering and Theil-Sen median slope calculation to resist noisy allocations from garbage collection pauses or transient caches.
+.IP 4. 4
+\fBSocket State Tracking:\fR
+Correlates open socket inodes with kernel socket tables to detect unclosed \fBCLOSE_WAIT\fR connections or abandoned listening endpoints.
+.SH EXIT STATUS
+.TP
+.B 0
+Success: no resource leaks or ceiling violations detected, or target process exited cleanly without \fB\-\-fail\-on\-leak\fR.
+.TP
+.B 1
+Resource leak detected (when \fB\-\-fail\-on\-leak\fR is enabled), or target child process exited with a non-zero exit status.
+.TP
+.B 2
+Command-line syntax error, invalid arguments, or inaccessible target PID.
+.SH EXAMPLES
+.PP
+Supervise a test suite in CI and fail if anonymous memory leaks faster than 25 KB/s:
+.PP
+.RS
+.nf
+leakspot \-\-fail\-on\-leak \-m 25600 \-\- ./run_integration_tests
+.fi
+.RE
+.PP
+Attach to an already running daemon and generate an interactive HTML report upon detachment:
+.PP
+.RS
+.nf
+leakspot \-p 14231 \-i 0.5 \-\-inspect\-maps \-\-html report.html
+.fi
+.RE
+.PP
+Assert that a background service never exceeds 256 MB RSS or 500 open file descriptors:
+.PP
+.RS
+.nf
+leakspot \-\-max\-rss 256 \-\-max\-fds 500 \-\-fail\-on\-leak \-\- /usr/bin/my_service \-\-port 8080
+.fi
+.RE
+.SH AUTHORS
+.B Akhmatov Aleksandr Tarasovich
+<\fImironovaleks620@gmail.com\fR>
+.PP
+Co-architected with
+.B Antigravity
+(AI coding assistant by Google DeepMind, Advanced Agentic Coding).
+.SH COPYRIGHT
+Copyright \(co 2026 Akhmatov Aleksandr Tarasovich.
+.br
+License: GNU General Public License version 3 or later <https://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it. There is NO WARRANTY, to the extent permitted by law.
+.SH SEE ALSO
+.BR top (1),
+.BR htop (1),
+.BR pmap (1),
+.BR proc (5)

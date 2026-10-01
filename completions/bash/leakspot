@@ -1,0 +1,71 @@
+# bash completion for leakspot                          -*- shell-script -*-
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (c) 2026 Akhmatov Aleksandr Tarasovich <mironovaleks620@gmail.com>
+
+_leakspot() {
+    local cur prev words cword
+    _init_completion || return
+
+    local opts="
+        -p --pid
+        -i --interval
+        -w --warmup
+        -t --timeout
+        -m --mem-threshold
+        -d --fd-threshold
+        -r --min-r2
+        -f --follow-children
+        --fail-on-leak
+        --max-rss
+        --max-anon
+        --max-fds
+        --max-threads
+        --no-exp
+        --no-sockets
+        --inspect-maps
+        --html
+        --json
+        --csv
+        -q --quiet
+        --cwd
+        --env
+        -h --help
+        -v --version
+        --
+    "
+
+    case "$prev" in
+        -p|--pid)
+            local pids
+            if [[ -d /proc ]]; then
+                pids=$(for d in /proc/[0-9]*; do basename "$d"; done 2>/dev/null)
+            else
+                pids=$(ps -ef | awk 'NR>1 {print $2}')
+            fi
+            COMPREPLY=($(compgen -W "$pids" -- "$cur"))
+            return 0
+            ;;
+        --html)
+            _filedir '@(htm|html)'
+            return 0
+            ;;
+        --cwd)
+            _filedir -d
+            return 0
+            ;;
+        -i|--interval|-w|--warmup|-t|--timeout|-m|--mem-threshold|-d|--fd-threshold|-r|--min-r2|--max-rss|--max-anon|--max-fds|--max-threads|--env)
+            # Argument expected; let user type
+            return 0
+            ;;
+    esac
+
+    if [[ "$cur" == -* ]]; then
+        COMPREPLY=($(compgen -W "$opts" -- "$cur"))
+        return 0
+    fi
+
+    # Fallback to file/command completion
+    _command_offset 1 2>/dev/null || _filedir
+}
+
+complete -F _leakspot leakspot

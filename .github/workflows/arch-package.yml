@@ -1,0 +1,48 @@
+name: Arch Linux AUR Packaging Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-aur-package:
+    name: Build & Validate PKGBUILD on Arch Linux
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+
+    steps:
+      - name: Update system & install package building dependencies
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --needed --noconfirm base-devel git cmake ninja clang mold sudo
+
+      - name: Create non-root build user
+        run: |
+          useradd -m -s /bin/bash builder
+          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fix repository permissions for builder
+        run: |
+          chown -R builder:builder .
+
+      - name: Validate and test build AUR-git package
+        run: |
+          su builder -c "
+            cd packaging/aur-git
+            makepkg -sfc --noconfirm
+          "
+
+      - name: Verify package archive contents
+        run: |
+          su builder -c "
+            cd packaging/aur-git
+            tar -tf leakspot-git-*.pkg.tar.zst | grep -E '/usr/bin/leakspot|/usr/share/man/man1/leakspot.1|/usr/share/bash-completion'
+          "

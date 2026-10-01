@@ -62,4 +62,11 @@ add_custom_target(run_all_tests ALL
     COMMENT ">>> Automatically executing leakspot test suite (100+ tests)..."
 )
 
-install(TARGETS leakspot DESTINATION bin)
+include(GNUInstallDirs)
+
+# Installation targets
+install(TARGETS leakspot DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(FILES docs/leakspot.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+install(FILES completions/bash/leakspot DESTINATION ${CMAKE_INSTALL_DATADIR}/bash-completion/completions)
+install(FILES completions/zsh/_leakspot DESTINATION ${CMAKE_INSTALL_DATADIR}/zsh/site-functions)
+install(FILES completions/fish/leakspot.fish DESTINATION ${CMAKE_INSTALL_DATADIR}/fish/vendor_completions.d)

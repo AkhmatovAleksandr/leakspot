@@ -1,0 +1,37 @@
+#compdef leakspot
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (c) 2026 Akhmatov Aleksandr Tarasovich <mironovaleks620@gmail.com>
+
+_leakspot() {
+    local curcontext="$curcontext" state line
+    typeset -A opt_args
+
+    _arguments -C \
+        '(-p --pid)'{-p+,--pid=}'[Attach to existing PID]:PID:_pids' \
+        '(-i --interval)'{-i+,--interval=}'[Sampling interval in seconds (default: 1.0)]:seconds:' \
+        '(-w --warmup)'{-w+,--warmup=}'[Warmup grace period in seconds (default: 10.0)]:seconds:' \
+        '(-t --timeout)'{-t+,--timeout=}'[Max supervision duration in seconds (default: 0=unlimited)]:seconds:' \
+        '(-m --mem-threshold)'{-m+,--mem-threshold=}'[Memory leak rate threshold in bytes/s (default: 10240)]:bytes/sec:' \
+        '(-d --fd-threshold)'{-d+,--fd-threshold=}'[File descriptor leak rate in FDs/min (default: 2.0)]:rate:' \
+        '(-r --min-r2)'{-r+,--min-r2=}'[Minimum R² statistical linearity required (default: 0.85)]:r2:' \
+        '(-f --follow-children)'{-f,--follow-children}'[Aggregate metrics across child processes]' \
+        '--fail-on-leak[Exit with code 1 if leak or hard ceiling violation is detected]' \
+        '--max-rss=[Fail if RSS exceeds limit in MB]:megabytes:' \
+        '--max-anon=[Fail if Anonymous memory exceeds limit in MB]:megabytes:' \
+        '--max-fds=[Fail if open file descriptors exceed count]:count:' \
+        '--max-threads=[Fail if active thread count exceeds limit]:count:' \
+        '--no-exp[Disable exponential acceleration detection]' \
+        '--no-sockets[Skip resolving TCP/UDP socket states]' \
+        '--inspect-maps[Perform deep /proc/[pid]/smaps address mapping diffing]' \
+        '--html=[Generate self-contained interactive HTML dashboard]:output file:_files -g "*.html"' \
+        '--json[Stream newline-delimited JSON telemetry (NDJSON)]' \
+        '--csv[Stream CSV telemetry]' \
+        '(-q --quiet)'{-q,--quiet}'[Suppress live ANSI ticker; print post-mortem only]' \
+        '--cwd=[Set child process working directory]:directory:_files -/' \
+        '*--env=[Inject environment variable (KEY=VAL)]:key=val:' \
+        '(-h --help)'{-h,--help}'[Display help message and exit]' \
+        '(-v --version)'{-v,--version}'[Display version information and exit]' \
+        '*::command: _normal'
+}
+
+_leakspot "$@"
