@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Compiler optimization and warnings
+# Optimization and warnings
 add_compile_options(
     -Wall
     -Wextra
@@ -29,22 +29,36 @@ endif()
 
 include_directories(include)
 
-set(LEAKSPOT_SOURCES
+set(LEAKSPOT_CORE_SOURCES
     src/types.cpp
-    src/cli.cpp
-    src/sampler.cpp
+    src/statistics.cpp
     src/regression.cpp
+    src/procfs.cpp
+    src/sampler.cpp
+    src/sparkline.cpp
+    src/policy.cpp
     src/detector.cpp
     src/reporter.cpp
+    src/cli.cpp
     src/supervisor.cpp
-    src/main.cpp
 )
 
-add_executable(leakspot ${LEAKSPOT_SOURCES})
+# Main executable
+add_executable(leakspot ${LEAKSPOT_CORE_SOURCES} src/main.cpp)
 
 # Test workloads
 add_executable(test_leaky_memory tests/leaky_memory.cpp)
 add_executable(test_leaky_fds tests/leaky_fds.cpp)
 add_executable(test_stable_workload tests/stable_workload.cpp)
+
+# Comprehensive Unit Test Suite (100+ tests)
+add_executable(unit_tests tests/unit_tests.cpp ${LEAKSPOT_CORE_SOURCES})
+
+# Automatically run tests on every ninja build!
+add_custom_target(run_all_tests ALL
+    COMMAND unit_tests
+    DEPENDS unit_tests
+    COMMENT ">>> Automatically executing leakspot test suite (100+ tests)..."
+)
 
 install(TARGETS leakspot DESTINATION bin)

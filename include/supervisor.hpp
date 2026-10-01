@@ -4,6 +4,7 @@
 #include "reporter.hpp"
 #include <vector>
 #include <atomic>
+#include <chrono>
 
 namespace leakspot {
 

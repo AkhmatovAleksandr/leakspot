@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.hpp"
+#include "policy.hpp"
 #include <vector>
 
 namespace leakspot {

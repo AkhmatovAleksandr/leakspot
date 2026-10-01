@@ -46,6 +46,17 @@ bool Supervisor::spawn_target_command() {
 
     if (pid == 0) {
         // In child process
+        if (!config_.working_dir.empty()) {
+            if (chdir(config_.working_dir.c_str()) != 0) {
+                std::cerr << "Failed to change directory to " << config_.working_dir << ": " << strerror(errno) << "\n";
+                _exit(127);
+            }
+        }
+
+        for (const auto& [k, v] : config_.env_vars) {
+            setenv(k.c_str(), v.c_str(), 1);
+        }
+
         execvp(argv_ptrs[0], argv_ptrs.data());
         std::cerr << "Failed to execute '" << argv_ptrs[0] << "': " << strerror(errno) << "\n";
         _exit(127);
@@ -81,7 +92,7 @@ void Supervisor::sample_cycle(const std::chrono::steady_clock::time_point& start
     auto now = std::chrono::steady_clock::now();
     double elapsed = std::chrono::duration<double>(now - start_time).count();
 
-    auto maybe_stats = Sampler::sample_process(monitored_pid_);
+    auto maybe_stats = Sampler::sample_process(monitored_pid_, config_.resolve_socket_endpoints);
     if (!maybe_stats) return;
 
     Sample sample;
@@ -92,7 +103,7 @@ void Supervisor::sample_cycle(const std::chrono::steady_clock::time_point& start
     if (config_.follow_children) {
         auto child_pids = Sampler::get_child_pids(monitored_pid_);
         for (pid_t cpid : child_pids) {
-            auto cstats = Sampler::sample_process(cpid);
+            auto cstats = Sampler::sample_process(cpid, config_.resolve_socket_endpoints);
             if (cstats) {
                 sample.children.push_back(*cstats);
             }
@@ -106,7 +117,7 @@ void Supervisor::sample_cycle(const std::chrono::steady_clock::time_point& start
 
     LeakVerdict verdict = Detector::evaluate(samples_, config_);
 
-    reporter_.report_sample(sample, verdict);
+    reporter_.report_sample(sample, verdict, samples_);
     reporter_.report_alert(verdict);
 }
 
@@ -125,14 +136,13 @@ int Supervisor::run() {
     }
 
     // Capture initial sample for header
-    auto initial_stats = Sampler::sample_process(monitored_pid_);
+    auto initial_stats = Sampler::sample_process(monitored_pid_, false);
     if (!initial_stats) {
         std::cerr << "Failed to read initial process telemetry.\n";
         return 1;
     }
 
     if (spawned_child_) {
-        // Use the executable's filename for the initial header display
         std::string cmd_name = std::filesystem::path(config_.command[0]).filename().string();
         initial_stats->comm = cmd_name;
     }
@@ -147,12 +157,21 @@ int Supervisor::run() {
             break;
         }
 
+        auto now = std::chrono::steady_clock::now();
+        double elapsed = std::chrono::duration<double>(now - start_time).count();
+        if (config_.timeout_sec > 0.0 && elapsed >= config_.timeout_sec) {
+            std::cout << std::format("\n[leakspot] Timeout reached ({:.1f}s). Terminating target...\n", config_.timeout_sec);
+            if (spawned_child_) {
+                kill(monitored_pid_, SIGTERM);
+            }
+            break;
+        }
+
         sample_cycle(start_time);
 
         std::this_thread::sleep_for(interval);
     }
 
-    // If stop was requested and we spawned a child, forward SIGINT to child
     if (stop_requested_.load() && spawned_child_) {
         kill(monitored_pid_, SIGINT);
         int status = 0;
@@ -161,7 +180,7 @@ int Supervisor::run() {
         else if (WIFSIGNALED(status)) child_exit_code_ = 128 + WTERMSIG(status);
     }
 
-    // Final evaluation & Post-Mortem Summary
+    // Final Post-Mortem Audit
     LeakVerdict final_verdict = Detector::evaluate(samples_, config_);
     reporter_.print_summary(samples_, final_verdict);
 
