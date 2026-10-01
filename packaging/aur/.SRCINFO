@@ -14,6 +14,6 @@ pkgbase = leakspot
 	optdepends = bash-completion: for tab-completion in bash
 	options = !debug
 	source = leakspot-1.0.0.tar.gz::https://github.com/AkhmatovAleksandr/leakspot/archive/refs/tags/v1.0.0.tar.gz
-	sha256sums = a6796da19c1478611519d08b92e61c8ac371848ba3c103ec8c795814ea22c9e2
+	sha256sums = a9118cb08c17f636a7937a964d5b9946f8b9dc91a6cff5d0542260e122cd24ed
 
 pkgname = leakspot
