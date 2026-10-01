@@ -170,6 +170,13 @@ flowchart TD
 
 ---
 
+## Authors & Acknowledgments
+
+* **Akhmatov Aleksandr Tarasovich ([@runvoid](https://github.com/runvoid))** — Creator and maintainer.
+* **Antigravity** — AI coding assistant by Google DeepMind (Advanced Agentic Coding), pair programming partner and co-architect for the C++23 systems telemetry engine, statistical regression algorithms, and automated test suite.
+
+---
+
 ## License
 
-MIT License. Crafted with precision for high-performance systems observability.
+MIT License. Copyright (c) 2026 Akhmatov Aleksandr Tarasovich. Crafted with precision for high-performance systems observability.
