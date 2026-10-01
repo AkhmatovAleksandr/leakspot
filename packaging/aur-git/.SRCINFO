@@ -15,6 +15,7 @@ pkgbase = leakspot-git
 	optdepends = bash-completion: for tab-completion in bash
 	provides = leakspot
 	conflicts = leakspot
+	options = !debug
 	source = git+https://github.com/AkhmatovAleksandr/leakspot.git
 	sha256sums = SKIP
 

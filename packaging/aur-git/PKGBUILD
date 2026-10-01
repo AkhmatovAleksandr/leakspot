@@ -11,6 +11,7 @@ optdepends=(
     'bash-completion: for tab-completion in bash'
 )
 makedepends=('git' 'cmake' 'ninja' 'clang' 'mold')
+options=('!debug')
 provides=('leakspot')
 conflicts=('leakspot')
 source=("git+https://github.com/AkhmatovAleksandr/leakspot.git")

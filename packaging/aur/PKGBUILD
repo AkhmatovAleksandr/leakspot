@@ -11,6 +11,7 @@ optdepends=(
     'bash-completion: for tab-completion in bash'
 )
 makedepends=('cmake' 'ninja' 'clang' 'mold')
+options=('!debug')
 source=("${pkgname}-${pkgver}.tar.gz::https://github.com/AkhmatovAleksandr/${pkgname}/archive/refs/tags/v${pkgver}.tar.gz")
 sha256sums=('a6796da19c1478611519d08b92e61c8ac371848ba3c103ec8c795814ea22c9e2')
 
