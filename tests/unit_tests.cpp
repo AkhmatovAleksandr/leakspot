@@ -7,6 +7,7 @@
 #include "detector.hpp"
 #include "cli.hpp"
 #include "sampler.hpp"
+#include "smaps.hpp"
 
 #include <iostream>
 #include <vector>
@@ -379,6 +380,79 @@ int main() {
     TEST_ASSERT("CLI parser: command size", cfg2.command.size() == 2);
     TEST_ASSERT("CLI parser: command arg 0", cfg2.command[0] == "ls");
     TEST_ASSERT("CLI parser: command arg 1", cfg2.command[1] == "-la");
+
+    // -------------------------------------------------------------------------
+    // CATEGORY 11: Memory Map (smaps) Inspector (Tests 113 - 125)
+    // -------------------------------------------------------------------------
+    std::cout << "\n--- Category 11: Memory Map (smaps) Inspector ---\n";
+
+    std::string mock_smaps =
+        "00400000-00452000 r-xp 00000000 08:02 173521 /usr/lib/libc.so\n"
+        "Size:                328 kB\n"
+        "Rss:                 200 kB\n"
+        "Pss:                 100 kB\n"
+        "Anonymous:             0 kB\n"
+        "Shared_Clean:        200 kB\n"
+        "Shared_Dirty:          0 kB\n"
+        "Private_Clean:         0 kB\n"
+        "Private_Dirty:         0 kB\n"
+        "Swap:                  0 kB\n"
+        "01200000-01400000 rw-p 00000000 00:00 0 [heap]\n"
+        "Size:               2048 kB\n"
+        "Rss:                1500 kB\n"
+        "Pss:                1500 kB\n"
+        "Anonymous:          1500 kB\n"
+        "Shared_Clean:          0 kB\n"
+        "Shared_Dirty:          0 kB\n"
+        "Private_Clean:         0 kB\n"
+        "Private_Dirty:      1500 kB\n"
+        "Swap:                  0 kB\n"
+        "7f8a12000000-7f8a12200000 rw-p 00000000 00:00 0\n"
+        "Size:               2048 kB\n"
+        "Rss:                2048 kB\n"
+        "Pss:                2048 kB\n"
+        "Anonymous:          2048 kB\n"
+        "Shared_Clean:          0 kB\n"
+        "Shared_Dirty:          0 kB\n"
+        "Private_Clean:         0 kB\n"
+        "Private_Dirty:      2048 kB\n"
+        "Swap:                  0 kB\n";
+
+    auto parsed_maps = SmapsInspector::parse_smaps_content(mock_smaps);
+    TEST_ASSERT("Smaps parser: parses 3 mappings", parsed_maps.size() == 3);
+    TEST_ASSERT("Smaps parser: map 0 path", parsed_maps[0].pathname == "/usr/lib/libc.so");
+    TEST_ASSERT("Smaps parser: map 0 perms", parsed_maps[0].perms == "r-xp");
+    TEST_ASSERT("Smaps parser: map 0 size", parsed_maps[0].size_bytes == 328 * 1024);
+    TEST_ASSERT("Smaps parser: map 1 is heap", parsed_maps[1].pathname == "[heap]");
+    TEST_ASSERT("Smaps parser: map 1 anon bytes", parsed_maps[1].anon_bytes == 1500 * 1024);
+    TEST_ASSERT("Smaps parser: map 2 is anonymous", parsed_maps[2].pathname == "[anon]");
+
+    // Diffing tests
+    auto baseline_maps = parsed_maps;
+    auto expanded_maps = parsed_maps;
+    // Simulate heap growing by 5 MB
+    expanded_maps[1].anon_bytes += 5 * 1024 * 1024;
+    expanded_maps[1].rss_bytes += 5 * 1024 * 1024;
+
+    // Simulate brand new 3 MB allocation
+    MemoryMapping new_m;
+    new_m.start_addr = 0x7f8a20000000;
+    new_m.end_addr = 0x7f8a20300000;
+    new_m.pathname = "[anon:alloc]";
+    new_m.perms = "rw-p";
+    new_m.anon_bytes = 3 * 1024 * 1024;
+    new_m.rss_bytes = 3 * 1024 * 1024;
+    expanded_maps.push_back(new_m);
+
+    auto diffs = SmapsInspector::diff_mappings(baseline_maps, expanded_maps, 5);
+    TEST_ASSERT("Smaps diff: detects 2 expanding mappings", diffs.size() == 2);
+    TEST_ASSERT("Smaps diff: top is heap", diffs[0].pathname == "[heap]");
+    TEST_ASSERT("Smaps diff: heap delta is 5 MB", diffs[0].delta_anon == 5 * 1024 * 1024);
+    TEST_ASSERT("Smaps diff: second is new mapping", diffs[1].is_new_mapping == true);
+    TEST_ASSERT("Smaps diff: new mapping delta is 3 MB", diffs[1].delta_anon == 3 * 1024 * 1024);
+
+    std::string report = SmapsInspector::format_diff_report(diffs);
+    TEST_ASSERT("Smaps report contains header", report.find("TOP EXPANDING VIRTUAL MEMORY REGIONS") != std::string::npos);
 
     // -------------------------------------------------------------------------
     // SUMMARY

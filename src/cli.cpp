@@ -151,6 +151,8 @@ Config CliParser::parse(int argc, char* argv[]) {
             config.enable_exponential_check = false;
         } else if (arg == "--no-sockets") {
             config.resolve_socket_endpoints = false;
+        } else if (arg == "--inspect-maps") {
+            config.inspect_maps = true;
         } else if (arg == "--json") {
             config.format = OutputFormat::JSON;
         } else if (arg == "--csv") {

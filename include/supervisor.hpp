@@ -2,6 +2,7 @@
 
 #include "types.hpp"
 #include "reporter.hpp"
+#include "smaps.hpp"
 #include <vector>
 #include <atomic>
 #include <chrono>
@@ -17,6 +18,8 @@ private:
     Config config_;
     Reporter reporter_;
     std::vector<Sample> samples_;
+    std::vector<MemoryMapping> baseline_smaps_;
+    std::vector<MemoryMapping> latest_smaps_;
     pid_t monitored_pid_{-1};
     bool spawned_child_{false};
     int child_exit_code_{0};

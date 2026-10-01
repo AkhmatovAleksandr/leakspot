@@ -39,6 +39,7 @@ set(LEAKSPOT_CORE_SOURCES
     src/policy.cpp
     src/detector.cpp
     src/reporter.cpp
+    src/smaps.cpp
     src/cli.cpp
     src/supervisor.cpp
 )

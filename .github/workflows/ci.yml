@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [clang++, g++]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build mold
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
+
+      - name: Build and Run Automated Tests
+        run: |
+          ninja -C build

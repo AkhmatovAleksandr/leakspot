@@ -175,6 +175,7 @@ struct Config {
     bool fail_on_leak{false};
     bool enable_exponential_check{true};
     bool resolve_socket_endpoints{true};
+    bool inspect_maps{false};                // Deep smaps virtual memory address diffing
     OutputFormat format{OutputFormat::ANSI_TICKER};
     std::string log_file;
     std::string html_report_path;

@@ -148,6 +148,7 @@ int Supervisor::run() {
     }
 
     reporter_.print_header(*initial_stats);
+    baseline_smaps_ = SmapsInspector::parse_smaps(monitored_pid_);
 
     auto start_time = std::chrono::steady_clock::now();
     auto interval = std::chrono::duration<double>(config_.sample_interval_sec);
@@ -169,6 +170,14 @@ int Supervisor::run() {
 
         sample_cycle(start_time);
 
+        // Keep latest smaps refreshed periodically if leak suspected or inspection requested
+        if (config_.inspect_maps || (!samples_.empty() && samples_.back().elapsed_sec >= config_.warmup_sec)) {
+            auto current_map = SmapsInspector::parse_smaps(monitored_pid_);
+            if (!current_map.empty()) {
+                latest_smaps_ = std::move(current_map);
+            }
+        }
+
         std::this_thread::sleep_for(interval);
     }
 
@@ -183,6 +192,11 @@ int Supervisor::run() {
     // Final Post-Mortem Audit
     LeakVerdict final_verdict = Detector::evaluate(samples_, config_);
     reporter_.print_summary(samples_, final_verdict);
+
+    if ((config_.inspect_maps || final_verdict.is_leaking_memory) && !baseline_smaps_.empty() && !latest_smaps_.empty()) {
+        auto diffs = SmapsInspector::diff_mappings(baseline_smaps_, latest_smaps_, 5);
+        std::cout << "\n" << SmapsInspector::format_diff_report(diffs) << "\n";
+    }
 
     if (config_.fail_on_leak && final_verdict.severity == Severity::LEAK) {
         return 1;

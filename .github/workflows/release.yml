@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build clang mold
+
+      - name: Build Release Binary
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++
+          ninja -C build
+
+      - name: Package Release
+        run: |
+          mkdir -p release-pkg
+          cp build/leakspot release-pkg/
+          cp README.md LICENSE release-pkg/
+          tar -czvf leakspot-${{ github.ref_name }}-linux-x86_64.tar.gz -C release-pkg .
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: leakspot-${{ github.ref_name }}-linux-x86_64.tar.gz
+          generate_release_notes: true
